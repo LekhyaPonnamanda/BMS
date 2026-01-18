@@ -1,0 +1,17 @@
+.App {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.main-content {
+  padding: 20px;
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 15px;
+  }
+}
+
