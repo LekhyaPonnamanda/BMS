@@ -37,6 +37,9 @@ public class SeatMapService {
 
         Show show = showOpt.get();
 
+        // Clear expired holds for this specific show before fetching seat map
+        clearExpiredHoldsForShow(show.getId());
+
         // Fetch all seats in the theatre
         List<Seat> seats = seatRepository
                 .findByTheatreIdAndIsActiveTrueOrderByRowLabelAscSeatNumberAsc(show.getTheatre().getId());
@@ -57,8 +60,24 @@ public class SeatMapService {
             return Optional.of(empty);
         }
 
-        // Fetch existing ShowSeat records
+        // CRITICAL: Fetch existing ShowSeat records - EXPLICITLY filter by showId only
+        // This ensures we ONLY get seats for THIS specific show (showId + showTime + date combination)
         List<ShowSeat> showSeats = showSeatRepository.findByShowId(show.getId());
+
+        // Additional validation: ensure all showSeats belong to this EXACT show
+        // This prevents any cross-show contamination
+        showSeats = showSeats.stream()
+                .filter(ss -> {
+                    boolean matches = ss.getShow().getId().equals(show.getId());
+                    if (!matches) {
+                        // Log warning if we find a ShowSeat that doesn't belong to this show
+                        System.err.println("WARNING: Found ShowSeat " + ss.getId() +
+                                " belonging to show " + ss.getShow().getId() +
+                                " when querying for show " + show.getId());
+                    }
+                    return matches;
+                })
+                .collect(Collectors.toList());
 
         // Map for quick lookup
         Map<Long, ShowSeat> seatMap = showSeats.stream()
@@ -86,16 +105,38 @@ public class SeatMapService {
         for (Seat seat : seats) {
             ShowSeat showSeat = seatMap.get(seat.getId());
 
-            boolean heldByCurrentUser = userId != null && userId.equals(showSeat.getHeldByUserId());
+            // CRITICAL: Validate that this ShowSeat belongs to the correct show
+            if (showSeat == null || !showSeat.getShow().getId().equals(show.getId())) {
+                // Create a new ShowSeat if it doesn't exist or belongs to wrong show
+                showSeat = new ShowSeat(show, seat, ShowSeatStatus.AVAILABLE);
+                showSeatRepository.save(showSeat);
+                seatMap.put(seat.getId(), showSeat);
+            }
+
+            // Only show as HELD if it's not expired
+            boolean isHeld = showSeat.getStatus() == ShowSeatStatus.HELD;
             LocalDateTime holdExpiresAt = showSeat.getHoldExpiresAt();
-            Long remainingSeconds = holdExpiresAt != null ? Duration.between(now, holdExpiresAt).getSeconds() : null;
+            if (isHeld && holdExpiresAt != null && holdExpiresAt.isBefore(now)) {
+                // Expired hold - treat as available
+                showSeat.setStatus(ShowSeatStatus.AVAILABLE);
+                showSeat.setHeldByUserId(null);
+                showSeat.setHoldExpiresAt(null);
+                showSeatRepository.save(showSeat);
+                isHeld = false;
+            }
+
+            boolean heldByCurrentUser = isHeld && userId != null && userId.equals(showSeat.getHeldByUserId());
+            Long remainingSeconds = holdExpiresAt != null && isHeld ? Duration.between(now, holdExpiresAt).getSeconds() : null;
+
+            // Determine final status
+            String finalStatus = isHeld ? ShowSeatStatus.HELD.name() : showSeat.getStatus().name();
 
             seatStatuses.add(new SeatStatusResponse(
                     seat.getId(),
                     seat.getRowLabel(),
                     seat.getSeatNumber(),
                     seat.getSeatType().name(),
-                    showSeat.getStatus().name(),
+                    finalStatus,
                     heldByCurrentUser,
                     holdExpiresAt,
                     remainingSeconds
@@ -119,5 +160,29 @@ public class SeatMapService {
         );
 
         return Optional.of(response);
+    }
+
+    /**
+     * Clear expired holds for a specific show
+     */
+    private void clearExpiredHoldsForShow(Long showId) {
+        LocalDateTime now = LocalDateTime.now();
+        List<ShowSeat> showSeats = showSeatRepository.findByShowId(showId);
+        List<ShowSeat> toUpdate = new ArrayList<>();
+
+        for (ShowSeat showSeat : showSeats) {
+            if (showSeat.getStatus() == ShowSeatStatus.HELD
+                    && showSeat.getHoldExpiresAt() != null
+                    && showSeat.getHoldExpiresAt().isBefore(now)) {
+                showSeat.setStatus(ShowSeatStatus.AVAILABLE);
+                showSeat.setHeldByUserId(null);
+                showSeat.setHoldExpiresAt(null);
+                toUpdate.add(showSeat);
+            }
+        }
+
+        if (!toUpdate.isEmpty()) {
+            showSeatRepository.saveAll(toUpdate);
+        }
     }
 }

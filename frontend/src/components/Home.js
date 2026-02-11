@@ -7,7 +7,7 @@ function Home() {
   const navigate = useNavigate();
 
   const cities = ['Hyderabad', 'Bangalore', 'Chennai'];
-  const languages = ['TELUGU', 'HINDI'];
+  const languages = ['Telugu', 'Hindi','English','Kannada','Tamil'];
 
   const handleSearch = () => {
     if (selectedCity) {

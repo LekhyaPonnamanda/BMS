@@ -31,7 +31,7 @@ public class ReminderCallScheduler {
 
     // CONFIGURABLE OFFSET: Change this value to adjust reminder time
     // Options: 30 minutes, 60 minutes (1 hour), etc.
-    private static final int REMINDER_OFFSET_MINUTES = 30; // Change to 60 for 1 hour reminders
+    private static final int REMINDER_OFFSET_MINUTES = 20; // Change to 60 for 1 hour reminders
     
     // Time window to trigger reminder (in minutes) - allows for slight timing differences
     private static final int REMINDER_WINDOW_MINUTES = 1;

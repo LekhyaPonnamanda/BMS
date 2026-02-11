@@ -64,13 +64,20 @@ public class SeatHoldService {
             throw new BookingException("One or more seat IDs are invalid for this show");
         }
 
+        // CRITICAL: Validate that all seats belong to the correct show
+        for (ShowSeat ss : showSeats) {
+            if (!ss.getShow().getId().equals(showId)) {
+                throw new BookingException("Seat does not belong to the specified show");
+            }
+        }
+
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime holdExpiresAt = now.plusMinutes(holdMinutes);
 
         List<Long> failedSeatIds = new ArrayList<>();
         for (ShowSeat showSeat : showSeats) {
             if (showSeat.getStatus() == ShowSeatStatus.BOOKED ||
-                (showSeat.getStatus() == ShowSeatStatus.HELD && showSeat.getHoldExpiresAt().isAfter(now))) {
+                    (showSeat.getStatus() == ShowSeatStatus.HELD && showSeat.getHoldExpiresAt().isAfter(now))) {
                 failedSeatIds.add(showSeat.getSeat().getId());
             }
         }
@@ -123,6 +130,13 @@ public class SeatHoldService {
         List<ShowSeat> showSeats = showSeatRepository.findByShowIdAndSeatIdInForUpdate(showId, request.getSeatIds());
         if (showSeats.size() != request.getSeatIds().size()) {
             throw new BookingException("One or more seat IDs are invalid for this show");
+        }
+
+        // CRITICAL: Validate that all seats belong to the correct show
+        for (ShowSeat ss : showSeats) {
+            if (!ss.getShow().getId().equals(showId)) {
+                throw new BookingException("Seat does not belong to the specified show");
+            }
         }
 
         LocalDateTime now = LocalDateTime.now();

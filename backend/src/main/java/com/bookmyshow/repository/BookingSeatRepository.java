@@ -4,7 +4,10 @@ import com.bookmyshow.entity.BookingSeat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> {
-    // You can add custom queries here if needed
+    List<BookingSeat> findByBookingId(Long bookingId);
+    List<BookingSeat> findByBookingIdAndShowId(Long bookingId, Long showId);
 }

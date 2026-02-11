@@ -1,16 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 function Booking() {
     const { showId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [show, setShow] = useState(null);
     const [seatMap, setSeatMap] = useState(null);
     const [selectedSeatIds, setSelectedSeatIds] = useState([]);
     const [holdExpiresAt, setHoldExpiresAt] = useState(null);
     const [holdRemainingSeconds, setHoldRemainingSeconds] = useState(null);
-    const [userName, setUserName] = useState("");
+    const userName = user?.name || user?.email || "";
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState(false);
     const [holding, setHolding] = useState(false);
@@ -21,15 +23,23 @@ function Booking() {
     }, [showId]);
 
     useEffect(() => {
+        // Reset state when showId changes
+        setSeatMap(null);
+        setSelectedSeatIds([]);
+        setHoldExpiresAt(null);
+        setError(null);
         fetchSeatMap();
-    }, [showId, userName]);
+    }, [showId, user?.id]);
 
     useEffect(() => {
+        // Only set up polling if we have a valid showId
+        if (!showId) return;
+
         const interval = setInterval(() => {
             fetchSeatMap();
         }, 5000);
         return () => clearInterval(interval);
-    }, [showId, userName]);
+    }, [showId, user?.id]);
 
     useEffect(() => {
         if (!holdExpiresAt) {
@@ -67,8 +77,22 @@ function Booking() {
 
     const fetchSeatMap = async () => {
         try {
-            const query = userName ? `?userId=${encodeURIComponent(userName)}` : "";
-            const response = await axios.get(`http://localhost:8090/api/shows/${showId}/seats${query}`);
+            // CRITICAL: Always use the current showId from URL params to ensure correct show
+            const currentShowId = showId;
+            if (!currentShowId) {
+                console.error('ShowId is missing');
+                return;
+            }
+
+            const query = user?.id ? `?userId=${encodeURIComponent(user.id.toString())}` : "";
+            const response = await axios.get(`http://localhost:8090/api/shows/${currentShowId}/seats${query}`);
+
+            // Validate that the response is for the correct show
+            if (response.data.showId && response.data.showId.toString() !== currentShowId.toString()) {
+                console.error('Seat map response is for wrong show:', response.data.showId, 'expected:', currentShowId);
+                return;
+            }
+
             setSeatMap(response.data);
 
             const heldSeats = response.data.seats.filter(seat => seat.status === 'HELD' && seat.heldByCurrentUser);
@@ -76,9 +100,14 @@ function Booking() {
                 const expiresAt = heldSeats[0].holdExpiresAt;
                 setHoldExpiresAt(expiresAt);
                 setSelectedSeatIds(heldSeats.map(seat => seat.seatId));
+            } else {
+                // Clear hold state if no held seats found
+                setHoldExpiresAt(null);
+                setSelectedSeatIds([]);
             }
         } catch (err) {
             console.error('Failed to load seat map:', err);
+            setError('Failed to load seat map. Please refresh the page.');
         }
     };
 
@@ -122,8 +151,8 @@ function Booking() {
     };
 
     const handleHoldSeats = async () => {
-        if (!userName.trim()) {
-            setError('Please enter your name to hold seats.');
+        if (!user || !userName.trim()) {
+            setError('Please login to hold seats.');
             return;
         }
         if (selectedSeatIds.length === 0) {
@@ -136,7 +165,7 @@ function Booking() {
             const response = await axios.post(`http://localhost:8090/api/shows/${showId}/seats/hold`, {
                 seatIds: selectedSeatIds,
                 holdMinutes: 10,
-                userId: userName,
+                userId: user.id.toString(),
             });
             setHoldExpiresAt(response.data.holdExpiresAt);
             setSelectedSeatIds(response.data.seats.map(seat => seat.seatId));
@@ -153,7 +182,7 @@ function Booking() {
             setHolding(true);
             await axios.post(`http://localhost:8090/api/shows/${showId}/seats/release`, {
                 seatIds: selectedSeatIds,
-                userId: userName,
+                userId: user?.id.toString(),
             });
             setHoldExpiresAt(null);
             setSelectedSeatIds([]);
@@ -167,8 +196,8 @@ function Booking() {
 
     const handleConfirmBooking = async (e) => {
         e.preventDefault();
-        if (!userName.trim()) {
-            setError('Please enter your name');
+        if (!user || !userName.trim()) {
+            setError('Please login to proceed with booking.');
             return;
         }
         if (!holdExpiresAt || !selectedSeatIds.length) {
@@ -182,7 +211,7 @@ function Booking() {
                 showId: parseInt(showId),
                 seatIds: selectedSeatIds,
                 userName: userName,
-                userId: userName,
+                userId: user.id.toString(),
                 showDetails: show
             }
         });
@@ -256,19 +285,17 @@ function Booking() {
                                 </div>
 
                                 <form onSubmit={handleConfirmBooking} className="booking-form">
-                                    <div className="mb-4">
-                                        <label htmlFor="userName" className="form-label">
-                                            <i className="bi bi-person me-2"></i>Your Name
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control form-control-lg"
-                                            value={userName}
-                                            onChange={(e) => setUserName(e.target.value)}
-                                            required
-                                            placeholder="Enter your full name"
-                                        />
-                                    </div>
+                                    {user && (
+                                        <div className="mb-4" style={{ background: '#e7f3ff', borderRadius: '12px', padding: '16px', border: '1px solid #b3d9ff' }}>
+                                            <div className="d-flex align-items-center">
+                                                <i className="bi bi-person-circle me-2" style={{ fontSize: '24px', color: 'var(--bms-red)' }}></i>
+                                                <div>
+                                                    <div style={{ fontWeight: '600', color: '#1A1A1A' }}>{user.name}</div>
+                                                    <small className="text-muted">{user.email}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className="seat-map-container mb-4">
                                         <h5 className="mb-3 text-center" style={{ fontWeight: '700' }}>Select Your Seats</h5>

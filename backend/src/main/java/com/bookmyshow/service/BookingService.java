@@ -45,6 +45,10 @@ public class BookingService {
         return bookingRepository.findById(id);
     }
 
+    public List<com.bookmyshow.entity.BookingSeat> getBookingSeatsByBookingId(Long bookingId) {
+        return bookingSeatRepository.findByBookingId(bookingId);
+    }
+
     @Transactional
     public Booking createBooking(Long showId, Integer seatsBooked, String userName) {
         Show show = showRepository.findById(showId)
@@ -87,6 +91,13 @@ public class BookingService {
 
         if (showSeats.size() != request.getSeatIds().size()) {
             throw new BookingException("Invalid seat ids for this show");
+        }
+
+        // CRITICAL: Validate that all seats belong to the correct show
+        for (ShowSeat ss : showSeats) {
+            if (!ss.getShow().getId().equals(request.getShowId())) {
+                throw new BookingException("Seat does not belong to the specified show");
+            }
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -132,9 +143,9 @@ public class BookingService {
         showRepository.save(show);
 
         notificationDispatcher.sendBookingConfirmation(
-                savedBooking, 
-                showSeats, 
-                request.getEmail(), 
+                savedBooking,
+                showSeats,
+                request.getEmail(),
                 request.getPhoneNumber()
         );
 

@@ -13,7 +13,8 @@ import java.util.List;
 
 public interface ShowSeatRepository extends JpaRepository<ShowSeat, Long> {
 
-    List<ShowSeat> findByShowId(Long showId);
+    @Query("SELECT ss FROM ShowSeat ss WHERE ss.show.id = :showId")
+    List<ShowSeat> findByShowId(@Param("showId") Long showId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""

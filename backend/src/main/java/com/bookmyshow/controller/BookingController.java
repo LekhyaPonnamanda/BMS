@@ -43,10 +43,24 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Booking> getBookingById(@PathVariable Long id) {
+    public ResponseEntity<?> getBookingById(@PathVariable Long id) {
         return bookingService.getBookingById(id)
-                .map(ResponseEntity::ok)
+                .map(booking -> {
+                    // Create a response object that includes booking and its seats
+                    java.util.Map<String, Object> response = new java.util.HashMap<>();
+                    response.put("booking", booking);
+                    response.put("seats", bookingService.getBookingSeatsByBookingId(id).stream()
+                            .map(bs -> {
+                                java.util.Map<String, Object> seatInfo = new java.util.HashMap<>();
+                                seatInfo.put("seatId", bs.getSeat().getId());
+                                seatInfo.put("rowLabel", bs.getSeat().getRowLabel());
+                                seatInfo.put("seatNumber", bs.getSeat().getSeatNumber());
+                                seatInfo.put("seatType", bs.getSeat().getSeatType().name());
+                                return seatInfo;
+                            })
+                            .collect(java.util.stream.Collectors.toList()));
+                    return ResponseEntity.ok(response);
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 }
-

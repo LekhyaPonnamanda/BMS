@@ -15,12 +15,20 @@ function BookingConfirmation() {
         fetchBookingDetails();
     }, [bookingId]);
 
+    const [bookedSeatDetails, setBookedSeatDetails] = useState([]);
+
     const fetchBookingDetails = async () => {
         try {
             setLoading(true);
             const bookingResponse = await axios.get(`http://localhost:8090/api/bookings/${bookingId}`);
-            const bookingData = bookingResponse.data;
+            const responseData = bookingResponse.data;
+
+            // Extract booking and seats from response
+            const bookingData = responseData.booking || responseData;
+            const seatsData = responseData.seats || [];
+
             setBooking(bookingData);
+            setBookedSeatDetails(seatsData);
 
             // Fetch show details (booking.show should have the show object with movie and theatre)
             const showId = bookingData.show?.id;
@@ -28,10 +36,6 @@ function BookingConfirmation() {
                 const showResponse = await axios.get(`http://localhost:8090/api/shows/${showId}`);
                 const showData = showResponse.data;
                 setShow(showData);
-
-                // Fetch seat map to get seat details
-                const seatMapResponse = await axios.get(`http://localhost:8090/api/shows/${showId}/seats`);
-                setSeatMap(seatMapResponse.data);
             } else {
                 setError('Show information not found in booking.');
             }
@@ -74,10 +78,14 @@ function BookingConfirmation() {
     };
 
     const getBookedSeats = () => {
-        if (!seatMap || !booking) return [];
-        // Get all booked seats and sort them
-        const bookedSeats = seatMap.seats
-            .filter(seat => seat.status === 'BOOKED')
+        // CRITICAL FIX: Only show seats from THIS specific booking, not all booked seats
+        if (!bookedSeatDetails || bookedSeatDetails.length === 0) {
+            // Fallback to seatsBooked count if seat details not available
+            return booking?.seatsBooked ? [`${booking.seatsBooked} seat(s)`] : [];
+        }
+
+        // Get seats ONLY from this booking and sort them
+        const bookedSeats = bookedSeatDetails
             .map(seat => `${seat.rowLabel}${seat.seatNumber}`)
             .sort((a, b) => {
                 // Sort by row first, then by seat number
@@ -124,10 +132,10 @@ function BookingConfirmation() {
                     <div className="col-lg-10 col-xl-8">
                         {/* Success Header */}
                         <div className="text-center mb-4">
-                            <div style={{ 
-                                width: '80px', 
-                                height: '80px', 
-                                borderRadius: '50%', 
+                            <div style={{
+                                width: '80px',
+                                height: '80px',
+                                borderRadius: '50%',
                                 background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -137,9 +145,9 @@ function BookingConfirmation() {
                             }}>
                                 <i className="bi bi-check-circle-fill" style={{ fontSize: '48px', color: 'white' }}></i>
                             </div>
-                            <h1 style={{ 
-                                color: '#1A1A1A', 
-                                fontWeight: '700', 
+                            <h1 style={{
+                                color: '#1A1A1A',
+                                fontWeight: '700',
                                 marginBottom: '10px',
                                 fontSize: '32px'
                             }}>
@@ -151,8 +159,8 @@ function BookingConfirmation() {
                         </div>
 
                         {/* Ticket Card */}
-                        <div className="card shadow-lg border-0 mb-4" style={{ 
-                            borderRadius: '20px', 
+                        <div className="card shadow-lg border-0 mb-4" style={{
+                            borderRadius: '20px',
                             overflow: 'hidden',
                             background: 'white',
                             border: '2px solid #e9ecef'
@@ -199,9 +207,9 @@ function BookingConfirmation() {
                                             height: '100%',
                                             border: '1px solid #e9ecef'
                                         }}>
-                                            <h5 style={{ 
-                                                color: '#6c757d', 
-                                                fontSize: '12px', 
+                                            <h5 style={{
+                                                color: '#6c757d',
+                                                fontSize: '12px',
                                                 textTransform: 'uppercase',
                                                 letterSpacing: '1px',
                                                 marginBottom: '12px',
@@ -240,9 +248,9 @@ function BookingConfirmation() {
                                             height: '100%',
                                             border: '1px solid #e9ecef'
                                         }}>
-                                            <h5 style={{ 
-                                                color: '#6c757d', 
-                                                fontSize: '12px', 
+                                            <h5 style={{
+                                                color: '#6c757d',
+                                                fontSize: '12px',
                                                 textTransform: 'uppercase',
                                                 letterSpacing: '1px',
                                                 marginBottom: '12px',

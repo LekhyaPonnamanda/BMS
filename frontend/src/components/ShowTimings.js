@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 function ShowTimings() {
   const { movieId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [shows, setShows] = useState([]);
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,6 +60,11 @@ function ShowTimings() {
   };
 
   const handleBookNow = (showId) => {
+    if (!isAuthenticated) {
+      // Redirect to login with return path
+      navigate('/login', { state: { from: { pathname: `/booking/${showId}` } } });
+      return;
+    }
     navigate(`/booking/${showId}`);
   };
 
@@ -134,8 +141,8 @@ function ShowTimings() {
         </div>
 
         {shows.length === 0 ? (
-          <div className="alert alert-info d-flex align-items-center" role="alert" style={{ 
-            borderRadius: '12px', 
+          <div className="alert alert-info d-flex align-items-center" role="alert" style={{
+            borderRadius: '12px',
             padding: '30px',
             background: 'linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%)',
             border: 'none'
@@ -162,7 +169,7 @@ function ShowTimings() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="mb-3" style={{
                     padding: '12px',
                     background: '#f8f9fa',
@@ -177,7 +184,7 @@ function ShowTimings() {
                       {formatDateTime(show.showTime)}
                     </div>
                   </div>
-                  
+
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <div>
                       <div style={{ fontSize: '12px', color: '#6c757d', marginBottom: '4px' }}>
@@ -188,14 +195,14 @@ function ShowTimings() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <button
                     className="btn btn-success w-100"
                     onClick={() => handleBookNow(show.id)}
                     disabled={show.availableSeats === 0}
-                    style={{ 
-                      fontSize: '16px', 
-                      fontWeight: '600', 
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
                       padding: '12px',
                       background: 'linear-gradient(135deg, var(--bms-red) 0%, var(--bms-red-dark) 100%)',
                       border: 'none'
@@ -224,4 +231,3 @@ function ShowTimings() {
 }
 
 export default ShowTimings;
-
