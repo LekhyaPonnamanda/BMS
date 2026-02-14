@@ -40,16 +40,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/movies/**").permitAll()
-                        .requestMatchers("/api/shows/**").permitAll()
-                        .requestMatchers("/api/theatres/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/movies/**").permitAll()
+                    .requestMatchers("/api/shows/**").permitAll()
+                    .requestMatchers("/api/theatres/**").permitAll()
+                    .requestMatchers("/api/snacks/**").permitAll()
+                    .requestMatchers("/snacks/**").permitAll()
+                    .requestMatchers("/api/rewards/points/**").permitAll()
+                    .requestMatchers("/api/rewards/**").permitAll()
+                    .requestMatchers("/static/**", "/images/**", "/resources/**", "/webjars/**").permitAll()
+                    .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

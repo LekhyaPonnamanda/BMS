@@ -9,9 +9,355 @@
   background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
 }
 
+/* Snack Card Styling */
+.card {
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+.hover-shadow {
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+.transition {
+  transition: all 0.3s ease;
+}
+
+/* Cart Styling */
+.cart-badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Payment Summit */
+.payment-summary {
+  position: sticky;
+  top: 20px;
+}
+
+/* Button Styling */
+.btn-success:hover {
+  transform: scale(1.02);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #000;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+  background-color: #ffb300;
+  border-color: #ffb300;
+}
+
+/* Price Display */
+.price-badge {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #28a745;
+}
+
+/* Order Message */
+.order-message {
+  animation: slideInDown 0.3s ease;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Progress Bar */
+.progress {
+  height: 25px;
+  background-color: #e9ecef;
+  border-radius: 5px;
+}
+
+.progress-bar {
+  font-weight: bold;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Input Field Styling */
+.input-group input {
+  border-color: #dee2e6;
+}
+
+.input-group input:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Cart Page Styles */
+.list-group-item {
+  border-color: #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Payment Checkout Styles */
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  flex: 1;
+}
+
+.step.active .step-number {
+  background-color: #0d6efd;
+  color: white;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+}
+
+.step.completed .step-number {
+  background-color: #28a745;
+  color: white;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 2px solid #dee2e6;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.step-label {
+  font-size: 12px;
+  text-align: center;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Form Control Styling */
+.form-control-lg:focus,
+.form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Spinner Animation */
+.spinner-border-sm {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Alert Animations */
+.alert {
+  animation: slideInDown 0.3s ease;
+}
+
+/* Empty Cart State */
+.empty-cart-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
     padding: 15px;
   }
+  
+  .payment-summary {
+    position: static;
+    margin-top: 20px;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+  }
+
+  .step-number {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .step-label {
+    font-size: 10px;
+  }
+
+  .list-group-item {
+    padding: 1rem 0.5rem !important;
+  }
+
+  .form-control-lg {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
 }
 
+@media (max-width: 992px) {
+  .card:hover {
+    transform: translateY(-3px);
+  }
+
+  .row > [class*='col-'] {
+    margin-bottom: 15px;
+  }
+}
+
+/* Utility Classes */
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+/* Additional Animations */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Toast Notification Styles */
+.toast-notification {
+  animation: slideInRight 0.3s ease;
+}
+
+/* Order Tracking Timeline */
+.timeline {
+  position: relative;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 20px;
+}
+
+.timeline-dot {
+  animation: bounceIn 0.5s ease;
+}
+/* Navbar Snack Button */
+.nav-snack-btn {
+  background: linear-gradient(135deg, #f5b700 0%, #ff8c00 100%);
+  color: white !important;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 10px 20px !important;
+  font-weight: 700;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+}
+
+.nav-snack-btn:hover {
+  background: linear-gradient(135deg, #ff8c00 0%, #f5b700 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
+  text-decoration: none;
+}
+
+.nav-snack-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
+}

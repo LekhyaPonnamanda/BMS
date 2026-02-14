@@ -39,6 +39,19 @@ function BookingConfirmation() {
             } else {
                 setError('Show information not found in booking.');
             }
+
+            // Refresh snack points and eligibility in Navbar after booking confirmation
+            if (window.refreshSnackPoints) {
+                window.refreshSnackPoints();
+            }
+            if (window.refreshSnackEligibility) {
+                window.refreshSnackEligibility();
+            }
+            
+            // Store booking details for snacks ordering (navbar access)
+            localStorage.setItem('lastBookingId', bookingId);
+            localStorage.setItem('lastTheatreId', bookingData.show?.theatre?.id || 1);
+            console.log('💾 Stored booking details for snacks ordering:', { bookingId, theatreId: bookingData.show?.theatre?.id });
         } catch (err) {
             setError('Failed to load booking details. Please try again.');
             console.error(err);
@@ -156,6 +169,16 @@ function BookingConfirmation() {
                             <p style={{ color: '#6c757d', fontSize: '18px' }}>
                                 Your tickets have been booked successfully
                             </p>
+                            {/* Snack Order Button */}
+                            {booking && show && (
+                                <button
+                                    className="btn btn-warning btn-lg mt-3"
+                                    style={{ fontWeight: '600', fontSize: '18px', borderRadius: '8px' }}
+                                    onClick={() => navigate('/snacks', { state: { bookingId: booking.id, showId: show.id } })}
+                                >
+                                    Order Snacks 🍿
+                                </button>
+                            )}
                         </div>
 
                         {/* Ticket Card */}

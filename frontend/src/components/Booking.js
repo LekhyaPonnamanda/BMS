@@ -101,9 +101,9 @@ function Booking() {
                 setHoldExpiresAt(expiresAt);
                 setSelectedSeatIds(heldSeats.map(seat => seat.seatId));
             } else {
-                // Clear hold state if no held seats found
+                // Only clear hold state, do NOT reset selectedSeatIds unless user explicitly releases or hold expires
                 setHoldExpiresAt(null);
-                setSelectedSeatIds([]);
+                // setSelectedSeatIds([]); // Do not reset selection here
             }
         } catch (err) {
             console.error('Failed to load seat map:', err);

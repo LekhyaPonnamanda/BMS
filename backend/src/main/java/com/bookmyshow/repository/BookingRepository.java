@@ -25,5 +25,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
            "ORDER BY s.showTime ASC")
     List<Booking> findConfirmedUpcomingBookings(@Param("status") BookingStatus status, 
                                                  @Param("now") LocalDateTime now);
+    
+    List<Booking> findByUserIdAndBookingTimeBetween(String userId, LocalDateTime start, LocalDateTime end);
 }
 

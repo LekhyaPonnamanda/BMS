@@ -37,6 +37,10 @@ public class BookingService {
     @Autowired
     private NotificationDispatcher notificationDispatcher;
 
+    // ✅ moved INSIDE class
+    @Autowired
+    private SnackRewardService snackRewardService;
+
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
     }
@@ -45,7 +49,7 @@ public class BookingService {
         return bookingRepository.findById(id);
     }
 
-    public List<com.bookmyshow.entity.BookingSeat> getBookingSeatsByBookingId(Long bookingId) {
+    public List<BookingSeat> getBookingSeatsByBookingId(Long bookingId) {
         return bookingSeatRepository.findByBookingId(bookingId);
     }
 
@@ -93,7 +97,6 @@ public class BookingService {
             throw new BookingException("Invalid seat ids for this show");
         }
 
-        // CRITICAL: Validate that all seats belong to the correct show
         for (ShowSeat ss : showSeats) {
             if (!ss.getShow().getId().equals(request.getShowId())) {
                 throw new BookingException("Seat does not belong to the specified show");
@@ -114,10 +117,13 @@ public class BookingService {
 
         Booking booking = new Booking(show, request.getSeatIds().size(), request.getUserId());
         booking.setUserId(request.getUserId());
-        booking.setPhoneNumber(request.getPhoneNumber()); // Store phone number for reminder calls
+        booking.setPhoneNumber(request.getPhoneNumber());
         booking.setStatus(BookingStatus.CONFIRMED);
         booking.setBookingTime(LocalDateTime.now());
         Booking savedBooking = bookingRepository.save(booking);
+
+        // ✅ reward call
+        snackRewardService.processBookingForRewards(request.getUserId());
 
         List<BookingSeat> bookingSeats = new ArrayList<>();
         for (ShowSeat ss : showSeats) {

@@ -1,3 +1,28 @@
+DELETE FROM snack;
+
+INSERT INTO snack (name, price, image_url) VALUES
+('Popcorn Salted', 150, 'https://cdn.create.vista.com/api/media/small/633960860/stock-vector-striped-paper-box-popcorn-isolated-white-background-realistic-mock-white'),
+('Popcorn Butter', 170, 'https://images.unsplash.com/photo-1578849278619-e73505e9610f'),
+('Chips', 190, 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087'),
+('Coke', 120, 'images/coke.jpg'),
+('Pepsi', 120, 'images/pepsi.jpg'),
+('Sprite', 120, 'https://c8.alamy.com/comp/2RYH2N0/carbonated-sprite-soft-drink-logo-sprite-drinks-icon-top-drink-company-brand-logo-on-transparent-background-2RYH2N0.jpg'),
+('Water Bottle', 60, 'images/water_bottle.jpg'),
+('Cold Coffee', 150, 'images/cold_coffee.jpg'),
+('Nachos', 200, 'images/nachos.jpg'),
+('French Fries', 160, 'images/french_fries.jpg'),
+('Burger', 220, 'images/burger.jpg'),
+('Veg Sandwich', 140, 'https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSQT8jlwwZWJExEX4WubyVGMXjZF1S55DmqdTuqeGPYKNZGHQgn0PN1hMAo9Ee7poxpHyamyRL1cN5wxcnLgrs7FGD6BT66'),
+('Hot Dog', 180, 'images/hot_dog.jpg'),
+('Popcorn + Coke Combo', 250, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSN0aTiqN_R5PQNiwIjSJUDErLNwiw_Nu03qQ&s'),
+('Nachos + Pepsi Combo', 260, 'https://images.deliveryhero.io/image/menu-import-gateway-prd/regions/ME/chains/HS-MUV/e8313e1d2e971bdba948ded4fc28c4be.png?width=1440&quality=75&webp=true'),
+('Ice Cream', 130, 'images/ice_cream.png'),
+('Strawberry Shake', 140, 'images/strawberry_shake.png'),
+('Veggie Wrap', 180, 'images/veggie_wrap.png');
+
+
+
+
 -- Insert Movies
 INSERT INTO movies (name, language, genre, duration) VALUES
 ('Baahubali 2', 'TELUGU', 'Action', 167),
